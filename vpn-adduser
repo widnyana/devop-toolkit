@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# 2019 - widnyana
+set -e
+
+echo "<VPN Name> VPN - Create User"
+echo '---------------------------'
+echo ''
+
+clientname=$1
+if [[ -z $clientname ]]; then
+    echo "[!] Usage: $0 <clientname>"
+    exit 1
+fi
+
+CLIENT_DIR="${HOME}/vpn-client-${clientname}"
+DEST_ZIP="${HOME}/vpn.client-${clientname}.tar.gz"
+
+source /path/to/your/easy-rsa/vars
+/path/to/your/easy-rsa/build-key ${clientname}
+
+mkdir -p ${CLIENT_DIR}
+cp "${KEY_DIR}/ca.crt" "${CLIENT_DIR}/ca.crt"
+cp "${KEY_DIR}/${clientname}.crt" "${CLIENT_DIR}/${clientname}.crt"
+cp "${KEY_DIR}/${clientname}.csr" "${CLIENT_DIR}/${clientname}.csr"
+cp "${KEY_DIR}/${clientname}.key" "${CLIENT_DIR}/${clientname}.key"
+cp "/path/to/your/server.tlsauth" "${CLIENT_DIR}/server.tlsauth"
+
+
+tar cvzf "${DEST_ZIP}" -C "$(dirname ${CLIENT_DIR})" "vpn-client-${clientname}"
+echo -e "[+] your file is ready:  ${DEST_ZIP}"
