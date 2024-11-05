@@ -16,10 +16,11 @@
 #   - Want to sell it? Weird flex, but okay!
 #   - Want to rename it and claim you wrote it? That's not cool, but it's legal!
 #
-# This program is free software. It comes without any warranty, 
+# This program is free software. It comes without any warranty,
 # to the extent permitted by applicable law. In fact, it might just
 # make your computer transform into a toaster. Who knows? ¯\_(ツ)_/¯
 #
+
 set -eo pipefail
 
 # Variables
@@ -45,10 +46,12 @@ for SCHEMA_DIR in "$DUMP_DIR"/*/; do
     SCHEMA_NAME=$(basename "$SCHEMA_DIR")
     echo "Restoring schema for $SCHEMA_NAME..."
 
+    psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" -c "CREATE SCHEMA IF NOT EXISTS ${SCHEMA_NAME};"
+
     # Iterate over each table schema file in the schema directory
     for SCHEMA_FILE in "$SCHEMA_DIR"/*_schema.sql; do
         echo "Restoring schema from $SCHEMA_FILE..."
-        psql -U "$DB_USER" -d "$DB_NAME" -f "$SCHEMA_FILE"
+        psql -h "${DB_HOST}" -p "${DB_PORT}" -U "$DB_USER" -d "$DB_NAME" -f "$SCHEMA_FILE"
         if [ $? -eq 0 ]; then
             echo "Schema restoration completed for $SCHEMA_FILE."
         else
@@ -71,7 +74,7 @@ if [[ "$RESTORE_DATA" == "y" || "$RESTORE_DATA" == "Y" ]]; then
 
         for DATA_FILE in "$SCHEMA_DIR"/*_data.sql; do
             echo "Restoring data from $DATA_FILE..."
-            psql -U "$DB_USER" -d "$DB_NAME" -f "$DATA_FILE"
+            psql -h "${DB_HOST}" -p "${DB_PORT}" -U "$DB_USER" -d "$DB_NAME" -f "$DATA_FILE"
             if [ $? -eq 0 ]; then
                 echo "Data restoration completed for $DATA_FILE."
             else
